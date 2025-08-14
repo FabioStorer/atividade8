@@ -30,7 +30,11 @@ app.post('/cliente', (req: Request, res: Response) => {
     const client: Client = (req.body);
     clients.push(client);
     console.log(clients)
-    return res.send('User successfully created.');
+    return res.send('Cliente cadastrado com sucesso.');
+});
+
+app.get('/cliente', (req: Request, res: Response) => {
+    res.json(clients);
 });
 
 app.get('/cliente/:cpf', (req: Request, res: Response) => {
@@ -43,6 +47,34 @@ app.get('/cliente/:cpf', (req: Request, res: Response) => {
     }
 
     res.json(cliente);
+});
+
+app.put('/cliente/:cpf', (req: Request, res: Response) => {
+    const cpf = Number(req.params.cpf);
+
+    const index = clients.findIndex(c => c.cpf === cpf);
+
+    if (index === -1) {
+        return res.status(404).json({ error: 'Cliente não encontrado' });
+    }
+
+    clients[index] = req.body;
+
+    res.send('Cliente atualizado com sucesso!');
+});
+
+app.delete('/cliente/:cpf', (req: Request, res: Response) => {
+    const cpf = Number(req.params.cpf);
+
+    const index = clients.findIndex(c => c.cpf === cpf);
+
+    if (index === -1) {
+        return res.status(404).json({ error: 'Cliente não encontrado' });
+    }
+
+    clients.splice(index, 1);
+
+    res.send('Cliente removido com sucesso!');
 });
 
 app.listen(process.env.API_PORT, () => {
