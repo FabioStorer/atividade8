@@ -21,14 +21,14 @@ const clientValidation = z.object({
 
         return numCpf;
     }),
-    name: z.string(),
+    name: z.string().min(1, "Nome é obrigatório"),
     rg: z.number(),
     cep: z.number(),
-    street: z.string(),
-    neighborhood: z.string(),
-    city: z.string(),
-    state: z.string(),
-    email: z.string().email()
+    street: z.string().min(1, "Rua é obrigatória"),
+    neighborhood: z.string().min(1, "Bairro é obrigatório"),
+    city: z.string().min(1, "Cidade é obrigatória"),
+    state: z.string().min(1, "Estado é obrigatório"),
+    email: z.string().min(1, "Email inválido")
 });
 
 let fakecpf: number = cpf.fake()
@@ -103,18 +103,25 @@ app.get('/cliente/:cpf', (req: Request, res: Response) => {
 });
 
 app.put('/cliente/:cpf', (req: Request, res: Response) => {
-    const cpf = Number(req.params.cpf);
+    try {
+        const cpfParam = Number(req.params.cpf);
 
-    const index = clients.findIndex(c => c.cpf === cpf);
+        const index = clients.findIndex(c => c.cpf === cpfParam);
 
-    if (index === -1) {
-        return res.status(404).json({ error: 'Cliente não encontrado' });
+        if (index === -1) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+
+        let updatedData = clientValidation.parse(req.body);
+
+        clients[index] = updatedData;
+
+        return res.send('Cliente atualizado com sucesso!');
+    } catch (err) {
+        return res.status(400).send('Dados inválidos e/ou faltando.');
     }
-
-    clients[index] = req.body;
-
-    res.send('Cliente atualizado com sucesso!');
 });
+
 
 app.delete('/cliente/:cpf', (req: Request, res: Response) => {
     const cpf = Number(req.params.cpf);
